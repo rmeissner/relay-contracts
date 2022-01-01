@@ -11,6 +11,8 @@ contract RelayModuleFixedReward {
 
     error RewardPaymentFailure();
 
+    error RewardPaymentMissing();
+
     error RelayExecutionFailure();
 
     error InvalidRelayData();
@@ -28,8 +30,13 @@ contract RelayModuleFixedReward {
         bytes calldata relayData,
         address rewardReceiver
     ) public {
+        uint256 receiverBalance = rewardReceiver.balance;
+
         // Transfer reward before execution to make sure that reward can be paid, revert otherwise
         if (!Safe(relayTarget).execTransactionFromModule(rewardReceiver, reward, "", 0)) revert RewardPaymentFailure();
+
+        // Check that reward transfer really happened
+        if (rewardReceiver.balance < receiverBalance + reward) revert RewardPaymentMissing();
 
         // Check relay data to avoid that module can be abused for arbitrary interactions
         if (bytes4(relayData[:4]) != relayMethod) revert InvalidRelayData();

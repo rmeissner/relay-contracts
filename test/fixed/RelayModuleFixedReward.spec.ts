@@ -30,13 +30,22 @@ describe("RelayModuleFixedReward", async () => {
             ).to.be.revertedWith("TestExecutor: Not authorized")
         })
 
-        it('should require payment', async () => {
+        it('should require payment tx to be successful', async () => {
             const { mock, executor, module } = await setupTests()
             const execTransactionData = executor.interface.encodeFunctionData("execTransaction", [mock.address, 0, "0xbaddad42", 0, 0, 0, 0, ethers.constants.AddressZero, ethers.constants.AddressZero, "0x"])
             await executor.setModule(module.address)
             await expect(
                 module.relayTransaction(executor.address, execTransactionData, user2.address)
             ).to.be.revertedWith("RewardPaymentFailure()")
+        })
+
+        it('should check if payment happened', async () => {
+            const { mock, executor, module } = await setupTests()
+            await mock.givenAnyReturnBool(true)
+            const execTransactionData = executor.interface.encodeFunctionData("execTransaction", [mock.address, 0, "0xbaddad42", 0, 0, 0, 0, ethers.constants.AddressZero, ethers.constants.AddressZero, "0x"])
+            await expect(
+                module.relayTransaction(mock.address, execTransactionData, user2.address)
+            ).to.be.revertedWith("RewardPaymentMissing()")
         })
 
         it('should only allow defined method', async () => {
