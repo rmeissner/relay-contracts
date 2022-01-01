@@ -1,5 +1,6 @@
 module.exports = {
     skipFiles: [
+        'test/TestExecutor.sol',
         'test/Imports.sol'
     ],
     mocha: {

@@ -4,7 +4,7 @@
 
 ## Compiler settings
 
-Solidity compiler: [0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6)
+Solidity compiler: [0.8.11](https://github.com/ethereum/solidity/releases/tag/v0.7.11)
 
 Solidity optimizer: `disabled`
 

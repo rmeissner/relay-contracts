@@ -43,7 +43,7 @@ import "./src/tasks/deploy_contracts"
 import "./src/tasks/show_codesize"
 import { BigNumber } from "@ethersproject/bignumber";
 
-const primarySolidityVersion = SOLIDITY_VERSION || "0.7.6"
+const primarySolidityVersion = SOLIDITY_VERSION || "0.8.11"
 const soliditySettings = !!SOLIDITY_SETTINGS ? JSON.parse(SOLIDITY_SETTINGS) : undefined
 
 const deterministicDeployment = USE_COMMUNITY_FACTORY === "true" ? undefined :

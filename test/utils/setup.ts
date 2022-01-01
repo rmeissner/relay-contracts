@@ -2,12 +2,22 @@ import hre, { deployments } from "hardhat"
 import { Wallet, Contract } from "ethers"
 import { AddressZero } from "@ethersproject/constants";
 import solc from "solc"
-import { logGas } from "../../src/utils/execution";
-import { safeContractUnderTest } from "./config";
+import { logGas } from "./gas";
+
+export const getFixedRewardModule = async () => {
+    const ModuleDeployment = await deployments.get("RelayModuleFixedReward");
+    const Module = await hre.ethers.getContractFactory("RelayModuleFixedReward");
+    return Module.attach(ModuleDeployment.address);
+}
 
 export const getMock = async () => {
     const Mock = await hre.ethers.getContractFactory("MockContract");
     return await Mock.deploy();
+}
+
+export const getExecutor = async () => {
+    const Executor = await hre.ethers.getContractFactory("TestExecutor");
+    return await Executor.deploy();
 }
 
 export const compile = async (source: string) => {
