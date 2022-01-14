@@ -20,13 +20,13 @@ describe("RelayModuleFixedReward", async () => {
         }
     })
 
-    describe("relayTransaction", async () => {
+    describe("relayTransactionOptimistic", async () => {
 
         it('should require enabled module', async () => {
             const { mock, executor, module } = await setupTests()
             const execTransactionData = executor.interface.encodeFunctionData("execTransaction", [mock.address, 0, "0xbaddad42", 0, 0, 0, 0, ethers.constants.AddressZero, ethers.constants.AddressZero, "0x"])
             await expect(
-                module.relayTransaction(executor.address, execTransactionData, user2.address)
+                module.relayTransactionOptimistic(executor.address, execTransactionData, user2.address)
             ).to.be.revertedWith("TestExecutor: Not authorized")
         })
 
@@ -35,7 +35,7 @@ describe("RelayModuleFixedReward", async () => {
             const execTransactionData = executor.interface.encodeFunctionData("execTransaction", [mock.address, 0, "0xbaddad42", 0, 0, 0, 0, ethers.constants.AddressZero, ethers.constants.AddressZero, "0x"])
             await executor.enableModule(module.address)
             await expect(
-                module.relayTransaction(executor.address, execTransactionData, user2.address)
+                module.relayTransactionOptimistic(executor.address, execTransactionData, user2.address)
             ).to.be.revertedWith("RewardPaymentFailure()")
         })
 
@@ -44,7 +44,7 @@ describe("RelayModuleFixedReward", async () => {
             await mock.givenAnyReturnBool(true)
             const execTransactionData = executor.interface.encodeFunctionData("execTransaction", [mock.address, 0, "0xbaddad42", 0, 0, 0, 0, ethers.constants.AddressZero, ethers.constants.AddressZero, "0x"])
             await expect(
-                module.relayTransaction(mock.address, execTransactionData, user2.address)
+                module.relayTransactionOptimistic(mock.address, execTransactionData, user2.address)
             ).to.be.revertedWith("RewardPaymentMissing()")
         })
 
@@ -57,7 +57,7 @@ describe("RelayModuleFixedReward", async () => {
                 await hre.ethers.provider.getBalance(executor.address)
             ).to.be.equals(parseEther("0.005"))
             await expect(
-                module.relayTransaction(executor.address, execData, user2.address)
+                module.relayTransactionOptimistic(executor.address, execData, user2.address)
             ).to.be.revertedWith("InvalidRelayData()")
             await expect(
                 await hre.ethers.provider.getBalance(executor.address)
@@ -74,7 +74,7 @@ describe("RelayModuleFixedReward", async () => {
             ).to.be.equals(parseEther("0.005"))
             await mock.givenAnyRevert()
             await expect(
-                module.relayTransaction(executor.address, execTransactionData, user2.address)
+                module.relayTransactionOptimistic(executor.address, execTransactionData, user2.address)
             ).to.be.revertedWith("RelayExecutionFailure()")
             await expect(
                 await hre.ethers.provider.getBalance(executor.address)
@@ -89,7 +89,7 @@ describe("RelayModuleFixedReward", async () => {
             await expect(
                 await hre.ethers.provider.getBalance(executor.address)
             ).to.be.equals(parseEther("0.005"))
-            await module.relayTransaction(executor.address, execTransactionData, user2.address)
+            await module.relayTransactionOptimistic(executor.address, execTransactionData, user2.address)
 
              // Check that fee was deducted
             await expect(
@@ -103,6 +103,24 @@ describe("RelayModuleFixedReward", async () => {
             await expect(
                 await mock.callStatic.invocationCountForMethod("0xbaddad42")
             ).to.be.equals(1)
+        })
+
+        it('should be able to enable with relayed tx', async () => {
+            const { executor, module } = await setupTests()
+            await user1.sendTransaction({ to: executor.address, value: parseEther("0.005")})
+
+            await expect(
+                await hre.ethers.provider.getBalance(executor.address)
+            ).to.be.equals(parseEther("0.005"))
+
+            const enableData = await executor.interface.encodeFunctionData("enableModule", [module.address])
+            const execTransactionData = executor.interface.encodeFunctionData("execTransaction", [executor.address, 0, enableData, 0, 0, 0, 0, ethers.constants.AddressZero, ethers.constants.AddressZero, "0x"])
+            await module.relayTransactionOptimistic(executor.address, execTransactionData, user2.address)
+
+             // Check that fee was deducted
+            await expect(
+                await hre.ethers.provider.getBalance(executor.address)
+            ).to.be.equals(0)
         })
 
     })
