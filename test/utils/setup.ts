@@ -1,13 +1,17 @@
 import hre, { deployments } from "hardhat"
 import { Wallet, Contract } from "ethers"
-import { AddressZero } from "@ethersproject/constants";
 import solc from "solc"
-import { logGas } from "./gas";
 
 export const getFixedRewardModule = async () => {
-    const ModuleDeployment = await deployments.get("RelayModuleFixedReward");
-    const Module = await hre.ethers.getContractFactory("RelayModuleFixedReward");
-    return Module.attach(ModuleDeployment.address);
+    const Deployment = await deployments.get("RelayModuleFixedReward");
+    const Contract = await hre.ethers.getContractFactory("RelayModuleFixedReward");
+    return Contract.attach(Deployment.address);
+}
+
+export const getEnableModuleLib = async () => {
+    const Deployment = await deployments.get("EnableModuleLib");
+    const Contract = await hre.ethers.getContractFactory("EnableModuleLib");
+    return Contract.attach(Deployment.address);
 }
 
 export const getMock = async () => {

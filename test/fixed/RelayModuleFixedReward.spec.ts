@@ -33,7 +33,7 @@ describe("RelayModuleFixedReward", async () => {
         it('should require payment tx to be successful', async () => {
             const { mock, executor, module } = await setupTests()
             const execTransactionData = executor.interface.encodeFunctionData("execTransaction", [mock.address, 0, "0xbaddad42", 0, 0, 0, 0, ethers.constants.AddressZero, ethers.constants.AddressZero, "0x"])
-            await executor.setModule(module.address)
+            await executor.enableModule(module.address)
             await expect(
                 module.relayTransaction(executor.address, execTransactionData, user2.address)
             ).to.be.revertedWith("RewardPaymentFailure()")
@@ -50,8 +50,8 @@ describe("RelayModuleFixedReward", async () => {
 
         it('should only allow defined method', async () => {
             const { mock, executor, module } = await setupTests()
-            const execData = executor.interface.encodeFunctionData("exec", [mock.address, 0, "0xbaddad42"])
-            await executor.setModule(module.address)
+            const execData = executor.interface.encodeFunctionData("exec", [mock.address, 0, "0xbaddad42", 0])
+            await executor.enableModule(module.address)
             await user1.sendTransaction({ to: executor.address, value: parseEther("0.005")})
             await expect(
                 await hre.ethers.provider.getBalance(executor.address)
@@ -67,7 +67,7 @@ describe("RelayModuleFixedReward", async () => {
         it('should require call to be successful', async () => {
             const { mock, executor, module } = await setupTests()
             const execTransactionData = executor.interface.encodeFunctionData("execTransaction", [mock.address, 0, "0xbaddad42", 0, 0, 0, 0, ethers.constants.AddressZero, ethers.constants.AddressZero, "0x"])
-                        await executor.setModule(module.address)
+                        await executor.enableModule(module.address)
             await user1.sendTransaction({ to: executor.address, value: parseEther("0.005")})
             await expect(
                 await hre.ethers.provider.getBalance(executor.address)
@@ -84,7 +84,7 @@ describe("RelayModuleFixedReward", async () => {
         it('should not revert if successful', async () => {
             const { mock, executor, module } = await setupTests()
             const execTransactionData = executor.interface.encodeFunctionData("execTransaction", [mock.address, 0, "0xbaddad42", 0, 0, 0, 0, ethers.constants.AddressZero, ethers.constants.AddressZero, "0x"])
-                        await executor.setModule(module.address)
+                        await executor.enableModule(module.address)
             await user1.sendTransaction({ to: executor.address, value: parseEther("0.005")})
             await expect(
                 await hre.ethers.provider.getBalance(executor.address)

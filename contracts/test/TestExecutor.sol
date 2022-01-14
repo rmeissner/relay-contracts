@@ -8,7 +8,7 @@ contract TestExecutor is Safe {
 
     receive() external payable {}
 
-    function setModule(address _module) external {
+    function enableModule(address _module) external {
         module = _module;
     }
 
@@ -16,7 +16,7 @@ contract TestExecutor is Safe {
         address to,
         uint256 value,
         bytes calldata data,
-        uint8,
+        uint8 operation,
         uint256,
         uint256,
         uint256,
@@ -24,14 +24,17 @@ contract TestExecutor is Safe {
         address payable,
         bytes memory
     ) external payable returns (bool success) {
-        exec(payable(to), value, data);
+        exec(payable(to), value, data, operation);
         return true;
     }
 
-    function exec(address payable to, uint256 value, bytes calldata data) public {
+    function exec(address payable to, uint256 value, bytes calldata data, uint operation) public {
         bool success;
         bytes memory response;
-        (success,response) = to.call{value: value}(data);
+        if (operation == 0)
+            (success,response) = to.call{value: value}(data);
+        else 
+            (success,response) = to.delegatecall(data);
         if(!success) {
             assembly {
                 revert(add(response, 0x20), mload(response))
