@@ -6,7 +6,6 @@ import "./interfaces/Safe.sol";
 /// @title Relay Module with fixed Reward
 /// @author Richard Meissner - @rmeissner
 contract RelayModuleFixedReward {
-
     string public constant VERSION = "1.0.0";
 
     error RewardPaymentFailure();
@@ -35,10 +34,7 @@ contract RelayModuleFixedReward {
         if (rewardReceiver.balance < receiverBalance + reward) revert RewardPaymentMissing();
     }
 
-    function relayCall(
-        address relayTarget,
-        bytes calldata relayData
-    ) internal {
+    function relayCall(address relayTarget, bytes calldata relayData) internal {
         // Check relay data to avoid that module can be abused for arbitrary interactions
         if (bytes4(relayData[:4]) != relayMethod) revert InvalidRelayData();
 
@@ -63,7 +59,7 @@ contract RelayModuleFixedReward {
         address rewardReceiver
     ) public {
         relayCall(relayTarget, relayData);
-        
+
         payReward(relayTarget, rewardReceiver);
     }
 }

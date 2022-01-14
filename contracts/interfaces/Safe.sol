@@ -2,7 +2,6 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 interface Safe {
-
     /// @dev Allows to add a module to the whitelist.
     ///      This can only be done via a Safe transaction.
     /// @notice Enables the module `module` for the Safe.

@@ -7,15 +7,11 @@ import "./interfaces/Safe.sol";
 /// @notice Can be used during Safe createion and should be called via deletegate call
 /// @author Richard Meissner - @rmeissner
 contract EnableModuleLib {
-
     string public constant VERSION = "1.0.0";
 
-    constructor() {
-    }
+    constructor() {}
 
-    function enableModule(
-        address module
-    ) public {
-        Safe(address(this)).enableModule(module);
+    function enableModules(address[] calldata modules) public {
+        for (uint256 i = modules.length; i > 0; i--) Safe(address(this)).enableModule(modules[i - 1]);
     }
 }
