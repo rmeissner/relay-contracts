@@ -9,7 +9,7 @@ const deploy: DeployFunction = async function (
   const { deployer } = await getNamedAccounts();
   const { deploy } = deployments;
 
-  await deploy("EnableModuleLib", {
+  await deploy("EnableModulesLib", {
     from: deployer,
     args: [],
     log: true,
