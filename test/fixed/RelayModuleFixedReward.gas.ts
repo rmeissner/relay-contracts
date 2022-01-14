@@ -44,5 +44,16 @@ describe("RelayModuleFixedReward", async () => {
             )
         })
 
+        it('gas consumptions with optimistic relay', async () => {
+            const { mock, executor, module } = await setupTests()
+            const execTransactionData = executor.interface.encodeFunctionData("execTransaction", [mock.address, 0, "0xbaddad42", 0, 0, 0, 0, ethers.constants.AddressZero, ethers.constants.AddressZero, "0x"])
+            await executor.enableModule(module.address)
+            await user1.sendTransaction({ to: executor.address, value: parseEther("0.005") })
+            await logGas(
+                "execute transaction via optimistic relay",
+                module.relayTransactionOptimistic(executor.address, execTransactionData, user1.address)
+            )
+        })
+
     })
 })

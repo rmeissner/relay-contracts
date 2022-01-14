@@ -6,7 +6,6 @@ import "./interfaces/Safe.sol";
 /// @title Relay Module with fixed Reward
 /// @author Richard Meissner - @rmeissner
 contract RelayModuleFixedReward {
-
     string public constant VERSION = "1.0.0";
 
     error RewardPaymentFailure();
@@ -25,11 +24,7 @@ contract RelayModuleFixedReward {
         relayMethod = _relayMethod;
     }
 
-    function relayTransaction(
-        address relayTarget,
-        bytes calldata relayData,
-        address rewardReceiver
-    ) public {
+    function payReward(address relayTarget, address rewardReceiver) internal {
         uint256 receiverBalance = rewardReceiver.balance;
 
         // Transfer reward before execution to make sure that reward can be paid, revert otherwise
@@ -37,12 +32,34 @@ contract RelayModuleFixedReward {
 
         // Check that reward transfer really happened
         if (rewardReceiver.balance < receiverBalance + reward) revert RewardPaymentMissing();
+    }
 
+    function relayCall(address relayTarget, bytes calldata relayData) internal {
         // Check relay data to avoid that module can be abused for arbitrary interactions
         if (bytes4(relayData[:4]) != relayMethod) revert InvalidRelayData();
 
         // Perform relay call and require success to avoid that user paid for failed transaction
         (bool success, ) = relayTarget.call(relayData);
         if (!success) revert RelayExecutionFailure();
+    }
+
+    function relayTransaction(
+        address relayTarget,
+        bytes calldata relayData,
+        address rewardReceiver
+    ) public {
+        payReward(relayTarget, rewardReceiver);
+
+        relayCall(relayTarget, relayData);
+    }
+
+    function relayTransactionOptimistic(
+        address relayTarget,
+        bytes calldata relayData,
+        address rewardReceiver
+    ) public {
+        relayCall(relayTarget, relayData);
+
+        payReward(relayTarget, rewardReceiver);
     }
 }

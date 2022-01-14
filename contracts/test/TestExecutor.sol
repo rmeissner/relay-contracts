@@ -4,12 +4,15 @@ pragma solidity >=0.8.0;
 import "../interfaces/Safe.sol";
 
 contract TestExecutor is Safe {
-    address public module;
-
     receive() external payable {}
 
+    uint256 public moduleCount;
+    mapping(address => bool) public modules;
+
     function enableModule(address _module) external {
-        module = _module;
+        if (modules[_module]) return;
+        moduleCount++;
+        modules[_module] = true;
     }
 
     function execTransaction(
@@ -28,14 +31,17 @@ contract TestExecutor is Safe {
         return true;
     }
 
-    function exec(address payable to, uint256 value, bytes calldata data, uint operation) public {
+    function exec(
+        address payable to,
+        uint256 value,
+        bytes calldata data,
+        uint256 operation
+    ) public {
         bool success;
         bytes memory response;
-        if (operation == 0)
-            (success,response) = to.call{value: value}(data);
-        else 
-            (success,response) = to.delegatecall(data);
-        if(!success) {
+        if (operation == 0) (success, response) = to.call{value: value}(data);
+        else (success, response) = to.delegatecall(data);
+        if (!success) {
             assembly {
                 revert(add(response, 0x20), mload(response))
             }
@@ -48,7 +54,7 @@ contract TestExecutor is Safe {
         bytes calldata data,
         uint8 operation
     ) external returns (bool success) {
-        require(msg.sender == module, "TestExecutor: Not authorized");
+        require(modules[msg.sender], "TestExecutor: Not authorized");
         if (operation == 1) (success, ) = to.delegatecall(data);
         else (success, ) = payable(to).call{value: value}(data);
     }
